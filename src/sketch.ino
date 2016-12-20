@@ -1,9 +1,9 @@
 int pinout[] = {8, 9, 10, 11};
 
-int pin_count = sizeof(pinout) / sizeof(pinout[0]);
+const int pin_count = sizeof(pinout) / sizeof(pinout[0]);
 
-int state[] = {0, 2};
-int state_count = pin_count / 2;
+const int state_count = pin_count / 2;
+int state[state_count];
 
 void apply_state() {
 	for (int i = 0; i < state_count; ++i) {
@@ -35,6 +35,8 @@ void report_state() {
 
 void setup()
 {
+	state[0] = 0;
+	state[1] = 2;
 	for (int i = 0; i < pin_count; ++i) {
 		pinMode(pinout[i], OUTPUT);
 	}
@@ -47,11 +49,15 @@ void setup()
 
 void serialEvent() {
 	int incomingByte = Serial.read();
-	int pinNum = incomingByte - 'a';
-	if (pinNum >= 0 && pinNum < pin_count) {
-		state[pinNum >> 1] = pinNum;
-		apply_state();
+	if (incomingByte == 'l') {
 		report_state();
+	} else {
+		int pinNum = incomingByte - 'a';
+		if (pinNum >= 0 && pinNum < pin_count) {
+			state[pinNum >> 1] = pinNum;
+			apply_state();
+			report_state();
+		}
 	}
 }
 
